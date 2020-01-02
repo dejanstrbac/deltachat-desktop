@@ -231,8 +231,9 @@ function init (cwd, state, logHandler) {
   })
 
   ipcMain.on('cancelCredentialsUpdate', () => {
+    dcController.configuring = false
+    dcController.updating = false
     const deltachat = dcController.getState()
-    deltachat.configuring = false
     sendState(deltachat)
   })
 
