@@ -9,10 +9,7 @@ import { openViewProfileDialog } from '../helpers/ChatMethods'
 
 const log = logger.getLogger('renderer/messageWrapper')
 
-const GROUP_TYPES = [
-  C.DC_CHAT_TYPE_GROUP,
-  C.DC_CHAT_TYPE_VERIFIED_GROUP
-]
+const GROUP_TYPES = [C.DC_CHAT_TYPE_GROUP, C.DC_CHAT_TYPE_VERIFIED_GROUP]
 
 export const InfoMessage = styled.div`
   width: 100%;
@@ -32,11 +29,15 @@ export const InfoMessage = styled.div`
   }
 `
 
-export const render = React.memo((props) => {
-  return <li><RenderMessage {...props} /></li>
+export const render = React.memo(props => {
+  return (
+    <li>
+      <RenderMessage {...props} />
+    </li>
+  )
 })
 
-export function RenderMessage (props) {
+export function RenderMessage(props) {
   const [chat, chatStoreDispatch] = useChatStore()
   const { message, locationStreamingEnabled } = props
   const { fromId, id } = message.msg
@@ -49,21 +50,29 @@ export function RenderMessage (props) {
 
   const conversationType = GROUP_TYPES.includes(chat.type) ? 'group' : 'direct'
   const onShowDetail = () => openDialog('MessageDetail', { message, chat })
-  const onDelete = () => openDialog('ConfirmationDialog', {
-    message: tx('ask_delete_message_desktop'),
-    confirmLabel: tx('delete'),
-    cb: yes => yes && chatStoreDispatch({ type: 'UI_DELETE_MESSAGE', payload: msg.id })
-  })
-  const onContactClick = async (contact) => {
+  const onDelete = () =>
+    openDialog('ConfirmationDialog', {
+      message: tx('ask_delete_message_desktop'),
+      confirmLabel: tx('delete'),
+      cb: yes =>
+        yes &&
+        chatStoreDispatch({ type: 'UI_DELETE_MESSAGE', payload: msg.id }),
+    })
+  const onContactClick = async contact => {
     openViewProfileDialog(screenContext, contact)
   }
 
   const contact = {
     onSendMessage: () => log.debug(`send a message to ${fromId}`),
-    onClick: () => { log.debug('click contact') }
+    onClick: () => {
+      log.debug('click contact')
+    },
   }
 
-  if (msg.text === '[The message was sent with non-verified encryption.. See "Info" for details.]') {
+  if (
+    msg.text ===
+    '[The message was sent with non-verified encryption.. See "Info" for details.]'
+  ) {
     msg.text = window.translate('message_not_verified')
   }
 
@@ -83,13 +92,14 @@ export function RenderMessage (props) {
     timestamp: msg.sentAt,
     viewType: msg.viewType,
     message,
-    hasLocation: (msg.hasLocation && locationStreamingEnabled)
+    hasLocation: msg.hasLocation && locationStreamingEnabled,
   }
 
   const isSetupmessage = message.msg.isSetupmessage
   const isDeadDrop = message.msg.chatId === C.DC_CHAT_ID_DEADDROP
   if (isSetupmessage) {
-    props.onClickMessageBody = () => openDialog('EnterAutocryptSetupMessage', { message })
+    props.onClickMessageBody = () =>
+      openDialog('EnterAutocryptSetupMessage', { message })
   } else if (isDeadDrop) {
     props.onClickMessageBody = () => {
       openDialog('DeadDrop', message)
@@ -97,7 +107,12 @@ export function RenderMessage (props) {
   }
 
   if (msg.attachment && !msg.isSetupmessage) props.attachment = msg.attachment
-  if (message.isInfo) return <InfoMessage onContextMenu={onShowDetail}><p>{msg.text}</p></InfoMessage>
+  if (message.isInfo)
+    return (
+      <InfoMessage onContextMenu={onShowDetail}>
+        <p>{msg.text}</p>
+      </InfoMessage>
+    )
 
   return <Message {...props} />
 }

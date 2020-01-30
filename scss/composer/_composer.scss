@@ -1,9 +1,10 @@
 .composer {
   background-color: var(--composerBg);
-  border-left: 1px solid rgba(16,22,26,0.1);
+  border-left: 1px solid rgba(16, 22, 26, 0.1);
 }
 
-.composer__attachment-button, .composer__emoji-button {
+.composer__attachment-button,
+.composer__emoji-button {
   float: left;
 
   position: fixed;
@@ -45,7 +46,7 @@
     height: 25px;
     margin-top: calc((40px - 25px) / 2);
     background-image: url(../images/emoji.png);
-    background-size: contain
+    background-size: contain;
   }
 }
 
@@ -62,7 +63,7 @@
   background-color: var(--composerSendButton);
   border-radius: 180px;
   cursor: pointer;
-  
+
   &:focus {
     outline: none;
   }
@@ -79,10 +80,9 @@
     background-position: 3px 1px;
     background-size: contain;
     vertical-align: middle;
-    
+
     &:focus {
       outline: none;
     }
   }
 }
-

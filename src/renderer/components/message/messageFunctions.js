@@ -29,20 +29,28 @@ const log = getLogger('render/msgFunctions')
 /**
  * @param {MsgObject} msg
  */
-export function onDownload (msg) {
-  const defaultPath = path.join(remote.app.getPath('downloads'), path.basename(msg.file))
-  remote.dialog.showSaveDialog({
-    defaultPath
-  }, (filename) => {
-    if (filename) ipcRenderer.send('saveFile', msg.file, filename)
-  })
+export function onDownload(msg) {
+  const defaultPath = path.join(
+    remote.app.getPath('downloads'),
+    path.basename(msg.file)
+  )
+  remote.dialog.showSaveDialog(
+    {
+      defaultPath,
+    },
+    filename => {
+      if (filename) ipcRenderer.send('saveFile', msg.file, filename)
+    }
+  )
 }
 
 /**
  * @param {MsgObject} msg
  */
-export function openAttachmentInShell (msg) {
+export function openAttachmentInShell(msg) {
   if (!shell.openItem(msg.file)) {
-    log.info("file couldn't be opened, try saving it in a different place and try to open it from there")
+    log.info(
+      "file couldn't be opened, try saving it in a different place and try to open it from there"
+    )
   }
 }

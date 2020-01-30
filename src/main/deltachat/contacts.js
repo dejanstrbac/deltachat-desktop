@@ -3,21 +3,21 @@ const log = require('../../shared/logger').getLogger('main/deltachat/contacts')
 
 const SplitOut = require('./splitout')
 module.exports = class DCContacts extends SplitOut {
-  unblockContact (contactId) {
+  unblockContact(contactId) {
     const contact = this._dc.getContact(contactId)
     this._dc.blockContact(contactId, false)
     const name = contact.getNameAndAddress()
     log.info(`Unblocked contact ${name} (id = ${contactId})`)
   }
 
-  blockContact (contactId) {
+  blockContact(contactId) {
     const contact = this._dc.getContact(contactId)
     this._dc.blockContact(contactId, true)
     const name = contact.getNameAndAddress()
     log.debug(`Blocked contact ${name} (id = ${contactId})`)
   }
 
-  acceptContactRequest ({ messageId, contactId }) {
+  acceptContactRequest({ messageId, contactId }) {
     log.info(`chat with dead drop ${contactId}:${messageId}`)
     const contact = this._dc.getContact(contactId)
     const address = contact.getAddress()
@@ -29,15 +29,18 @@ module.exports = class DCContacts extends SplitOut {
     return chatId
   }
 
-  createContact (name, email) {
+  createContact(name, email) {
     if (!DeltaChat.maybeValidAddr(email)) {
-      this._controller.emit('error', this._controller.translate('bad_email_address'))
+      this._controller.emit(
+        'error',
+        this._controller.translate('bad_email_address')
+      )
       return null
     }
     return this._dc.createContact(name || '', email)
   }
 
-  createChatByContactId (contactId) {
+  createChatByContactId(contactId) {
     const contact = this._dc.getContact(contactId)
     if (!contact) {
       log.warn(`no contact could be found with id ${contactId}`)
@@ -55,16 +58,16 @@ module.exports = class DCContacts extends SplitOut {
     return chatId
   }
 
-  getContact (contactId) {
+  getContact(contactId) {
     return this._dc.getContact(contactId).toJson()
   }
 
-  markNoticedContact (contactId) {
+  markNoticedContact(contactId) {
     return this._dc.markNoticedContact(contactId)
   }
 
   /** Gets the direct message chat id with this contact and creates it if it doesn't exist yet */
-  getDMChatId (contactId) {
+  getDMChatId(contactId) {
     const existingChatId = this._dc.getChatIdByContactId(contactId)
     if (existingChatId !== 0) {
       return existingChatId

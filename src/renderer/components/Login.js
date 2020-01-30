@@ -13,45 +13,45 @@ import {
   DeltaProgressBar,
   AdvancedButton,
   AdvancedButtonIconClosed,
-  AdvancedButtonIconOpen
+  AdvancedButtonIconOpen,
 } from './Login-Styles'
-import {
-  Collapse,
-  Intent
-} from '@blueprintjs/core'
+import { Collapse, Intent } from '@blueprintjs/core'
 
 export default class Login extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       credentials: this._defaultCredentials(),
       ui: {
         showAdvanced: false,
         showPasswordMail: false,
-        showPasswordSend: false
+        showPasswordSend: false,
       },
       progress: 0,
       dirty: false,
-      disableSubmit: false
+      disableSubmit: false,
     }
     this._updateProgress = this._updateProgress.bind(this)
     this.handleCredentialsChange = this.handleCredentialsChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     ipcRenderer.on('DC_EVENT_CONFIGURE_PROGRESS', this._updateProgress)
   }
 
-  componentWillUnmount () {
-    ipcRenderer.removeListener('DC_EVENT_CONFIGURE_PROGRESS', this._updateProgress)
+  componentWillUnmount() {
+    ipcRenderer.removeListener(
+      'DC_EVENT_CONFIGURE_PROGRESS',
+      this._updateProgress
+    )
   }
 
-  _updateProgress (ev, [progress, _]) {
+  _updateProgress(ev, [progress, _]) {
     this.setState({ progress })
   }
 
-  _defaultCredentials () {
+  _defaultCredentials() {
     return {
       addr: this.props.addr || '',
       mail_user: this.props.mail_user || '',
@@ -65,11 +65,11 @@ export default class Login extends React.Component {
       send_server: this.props.send_server || '',
       send_port: this.props.send_port || '',
       send_security: this.props.send_security || '',
-      smtp_certificate_checks: this.props.smtp_certificate_checks || ''
+      smtp_certificate_checks: this.props.smtp_certificate_checks || '',
     }
   }
 
-  handleCredentialsChange (event) {
+  handleCredentialsChange(event) {
     const { mode } = this.props
     const { id, value } = event.target
     let updatedCredentials
@@ -78,33 +78,35 @@ export default class Login extends React.Component {
       // for all protocols.
       updatedCredentials = {
         imap_certificate_checks: { $set: value },
-        smtp_certificate_checks: { $set: value }
+        smtp_certificate_checks: { $set: value },
       }
     } else {
       updatedCredentials = {
-        [id]: { $set: value }
+        [id]: { $set: value },
       }
     }
 
     const updatedState = update(this.state, {
-      credentials: updatedCredentials
+      credentials: updatedCredentials,
     })
     let dirty = false
     if (mode === 'update') {
-      dirty = Object.keys(updatedState.credentials).find(
-        key => this.props[key] !== updatedState.credentials[key]
-      ) !== undefined
+      dirty =
+        Object.keys(updatedState.credentials).find(
+          key => this.props[key] !== updatedState.credentials[key]
+        ) !== undefined
     } else {
-      dirty = Object.keys(updatedState.credentials).find(
-        key => updatedState.credentials[key] !== ''
-      ) !== undefined
+      dirty =
+        Object.keys(updatedState.credentials).find(
+          key => updatedState.credentials[key] !== ''
+        ) !== undefined
     }
     updatedState.dirty = dirty
     updatedState.disableSubmit = false
     this.setState(updatedState)
   }
 
-  handleSubmit (event) {
+  handleSubmit(event) {
     const { mode } = this.props
     const credentials = this.state.credentials
     this.props.onSubmit(credentials)
@@ -114,12 +116,12 @@ export default class Login extends React.Component {
     }
   }
 
-  handleUISwitchStateProperty (key) {
+  handleUISwitchStateProperty(key) {
     const stateUi = Object.assign(this.state.ui, { [key]: !this.state.ui[key] })
     this.setState(stateUi)
   }
 
-  cancelClick (event) {
+  cancelClick(event) {
     const { mode } = this.props
     event.preventDefault()
     event.stopPropagation()
@@ -131,34 +133,41 @@ export default class Login extends React.Component {
     }
   }
 
-  renderLoginHeader (mode) {
-    return mode === 'update' ? null : <DeltaText>{window.translate('login_explain')}</DeltaText>
+  renderLoginHeader(mode) {
+    return mode === 'update' ? null : (
+      <DeltaText>{window.translate('login_explain')}</DeltaText>
+    )
   }
 
-  _getDefaultPort (protocol) {
+  _getDefaultPort(protocol) {
     const SendSecurityPortMap = {
       imap: {
         ssl: 993,
-        default: 143
+        default: 143,
       },
       smtp: {
         ssl: 465,
         starttls: 587,
-        plain: 25
-      }
+        plain: 25,
+      },
     }
-    const {
-      mail_security,
-      send_security
-    } = this.state.credentials
+    const { mail_security, send_security } = this.state.credentials
     if (protocol === 'imap') {
-      if (mail_security === 'automatic' || mail_security === '' || mail_security === 'ssl') {
+      if (
+        mail_security === 'automatic' ||
+        mail_security === '' ||
+        mail_security === 'ssl'
+      ) {
         return SendSecurityPortMap.imap['ssl']
       } else {
         return SendSecurityPortMap.imap['default']
       }
     } else {
-      if (send_security === 'automatic' || send_security === '' || send_security === 'ssl') {
+      if (
+        send_security === 'automatic' ||
+        send_security === '' ||
+        send_security === 'ssl'
+      ) {
         return SendSecurityPortMap.smtp['ssl']
       } else {
         return SendSecurityPortMap.smtp[send_security]
@@ -166,7 +175,7 @@ export default class Login extends React.Component {
     }
   }
 
-  render () {
+  render() {
     const { addrDisabled, loading, mode } = this.props
     const { disableSubmit } = this.state
 
@@ -182,7 +191,7 @@ export default class Login extends React.Component {
       send_pw,
       send_server,
       send_port,
-      send_security
+      send_security,
     } = this.state.credentials
 
     // We assume that smtp_certificate_checks has the same value.
@@ -198,7 +207,6 @@ export default class Login extends React.Component {
       <React.Fragment>
         {this.renderLoginHeader(mode)}
         <form onSubmit={this.handleSubmit} className='login-form'>
-
           <DeltaInput
             key='addr'
             id='addr'
@@ -216,9 +224,19 @@ export default class Login extends React.Component {
             onChange={this.handleCredentialsChange}
           />
           <DeltaText>{tx('login_no_servers_hint')}</DeltaText>
-          <AdvancedButton onClick={this.handleUISwitchStateProperty.bind(this, 'showAdvanced')} id={'show-advanced-button'}>
-            {(showAdvanced ? <AdvancedButtonIconClosed /> : <AdvancedButtonIconOpen />)}
-            <p>{tx('menu_advanced') }</p>
+          <AdvancedButton
+            onClick={this.handleUISwitchStateProperty.bind(
+              this,
+              'showAdvanced'
+            )}
+            id={'show-advanced-button'}
+          >
+            {showAdvanced ? (
+              <AdvancedButtonIconClosed />
+            ) : (
+              <AdvancedButtonIconOpen />
+            )}
+            <p>{tx('menu_advanced')}</p>
           </AdvancedButton>
           <Collapse isOpen={showAdvanced}>
             <br />
@@ -324,23 +342,27 @@ export default class Login extends React.Component {
             >
               <option value={C.DC_CERTCK_AUTO}>{tx('automatic')}</option>
               <option value={C.DC_CERTCK_STRICT}>{tx('strict')}</option>
-              <option value={C.DC_CERTCK_ACCEPT_INVALID_HOSTNAMES}>{tx('accept_invalid_hostnames')}</option>
-              <option value={C.DC_CERTCK_ACCEPT_INVALID_CERTIFICATES}>{tx('accept_invalid_certificates')}</option>
+              <option value={C.DC_CERTCK_ACCEPT_INVALID_HOSTNAMES}>
+                {tx('accept_invalid_hostnames')}
+              </option>
+              <option value={C.DC_CERTCK_ACCEPT_INVALID_CERTIFICATES}>
+                {tx('accept_invalid_certificates')}
+              </option>
             </DeltaSelect>
           </Collapse>
           <br />
           <DeltaText>{tx('login_subheader')}</DeltaText>
-          {
-            loading &&
-              <DeltaProgressBar
-                progress={this.state.progress}
-                intent={Intent.SUCCESS}
-              />
-          }
-          {React.Children.map(this.props.children, (child) => {
+          {loading && (
+            <DeltaProgressBar
+              progress={this.state.progress}
+              intent={Intent.SUCCESS}
+            />
+          )}
+          {React.Children.map(this.props.children, child => {
             var props = {}
             if (child.props.type === 'submit') {
-              props.disabled = loading || (!addr || !mail_pw) || !dirty || disableSubmit
+              props.disabled =
+                loading || !addr || !mail_pw || !dirty || disableSubmit
             }
             if (child.props.type === 'cancel') {
               if (!loading) return
@@ -348,7 +370,6 @@ export default class Login extends React.Component {
             }
             return React.cloneElement(child, props)
           })}
-
         </form>
       </React.Fragment>
     )

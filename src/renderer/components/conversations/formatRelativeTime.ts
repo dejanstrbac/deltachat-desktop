@@ -3,12 +3,12 @@ import moment from 'moment'
 const getExtendedFormats = () => ({
   y: 'lll',
   M: `${(window as any).translate('timestamp_format_m_desktop') || 'MMM D'} LT`,
-  d: 'ddd LT'
+  d: 'ddd LT',
 })
 const getShortFormats = () => ({
   y: 'll',
   M: (window as any).translate('timestamp_format_m_desktop') || 'MMM D',
-  d: 'ddd'
+  d: 'ddd',
 })
 
 function isToday(timestamp: moment.Moment) {
@@ -43,13 +43,16 @@ export default function formatRelativeTime(
   } else if (diff.hours() >= 1) {
     const key = 'n_hours'
 
-    return tx(key, diff.hours(), { quantity: diff.hours() === 1 ? 'one' : 'other' })
+    return tx(key, diff.hours(), {
+      quantity: diff.hours() === 1 ? 'one' : 'other',
+    })
   } else if (diff.minutes() >= 1) {
     const key = 'n_minutes'
 
-    return tx(key, diff.minutes(), { quantity: diff.minutes() === 1 ? 'one' : 'other' })
+    return tx(key, diff.minutes(), {
+      quantity: diff.minutes() === 1 ? 'one' : 'other',
+    })
   }
 
   return tx('now')
 }
-

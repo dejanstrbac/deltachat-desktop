@@ -11,7 +11,7 @@ module.exports = class DCLoginController extends SplitOut {
    * Called when this controller is created and when current
    * locale changes
    */
-  setCoreStrings (strings) {
+  setCoreStrings(strings) {
     if (!this._dc) return
 
     Object.keys(strings).forEach(key => {
@@ -21,7 +21,13 @@ module.exports = class DCLoginController extends SplitOut {
     this._controller._sendStateToRenderer()
   }
 
-  login (accountDir, credentials, sendStateToRenderer, coreStrings, updateConfiguration) {
+  login(
+    accountDir,
+    credentials,
+    sendStateToRenderer,
+    coreStrings,
+    updateConfiguration
+  ) {
     // Creates a separate DB file for each login
     this._controller.accountDir = accountDir
     log.info(`Using deltachat instance ${this._controller.accountDir}`)
@@ -31,7 +37,10 @@ module.exports = class DCLoginController extends SplitOut {
     this._controller._sendStateToRenderer = sendStateToRenderer
 
     if (!DeltaChat.maybeValidAddr(credentials.addr)) {
-      this._controller.emit('error', this._controller.translate('bad_email_address'))
+      this._controller.emit(
+        'error',
+        this._controller.translate('bad_email_address')
+      )
       return
     }
 
@@ -62,30 +71,33 @@ module.exports = class DCLoginController extends SplitOut {
     setupMarkseenFix(this._controller)
   }
 
-  logout () {
+  logout() {
     this.close()
     this._controller._resetState()
 
     log.info('Logged out')
     this._controller.emit('logout')
-    if (typeof this._controller._sendStateToRenderer === 'function') this._controller._sendStateToRenderer()
+    if (typeof this._controller._sendStateToRenderer === 'function')
+      this._controller._sendStateToRenderer()
   }
 
-  close () {
+  close() {
     if (!this._dc) return
     this._dc.close()
     this._controller._dc = null
   }
 
-  addServerFlags (credentials) {
+  addServerFlags(credentials) {
     return Object.assign({}, credentials, {
-      server_flags: this._controller.settings.serverFlags(credentials)
+      server_flags: this._controller.settings.serverFlags(credentials),
     })
   }
 
-  updateDeviceChats () {
+  updateDeviceChats() {
     this._dc.updateDeviceChats()
-    this._dc.addDeviceMessage('changelog-version-0.900.0-test9', `Changes in v0.900.0
+    this._dc.addDeviceMessage(
+      'changelog-version-0.900.0-test9',
+      `Changes in v0.900.0
 
 - Many new background images🖼️
 - You can copy a link by right clicking on the message and selecting "Copy link"
@@ -94,6 +106,7 @@ module.exports = class DCLoginController extends SplitOut {
 - Performance & stability improvements
 
 Full changelog: http://delta.chat/a5f/ 
-    `)
+    `
+    )
   }
 }

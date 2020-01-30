@@ -1,8 +1,12 @@
 import React from 'react'
-import DeltaDialog, { DeltaDialogBody, DeltaDialogContent, DeltaDialogFooter } from './DeltaDialog'
+import DeltaDialog, {
+  DeltaDialogBody,
+  DeltaDialogContent,
+  DeltaDialogFooter,
+} from './DeltaDialog'
 import qr from 'react-qr-svg'
 
-export function DeltaDialogQrInner ({ qrCode, description }) {
+export function DeltaDialogQrInner({ qrCode, description }) {
   return (
     <>
       <DeltaDialogBody>
@@ -23,7 +27,7 @@ export function DeltaDialogQrInner ({ qrCode, description }) {
   )
 }
 
-export default function QrInviteCode ({ onClose, isOpen, qrCode, deltachat }) {
+export default function QrInviteCode({ onClose, isOpen, qrCode, deltachat }) {
   const tx = window.translate
   return (
     <DeltaDialog
@@ -31,7 +35,12 @@ export default function QrInviteCode ({ onClose, isOpen, qrCode, deltachat }) {
       isOpen={isOpen}
       onClose={onClose}
     >
-      <DeltaDialogQrInner description={tx('qrshow_join_contact_hint', [deltachat.credentials.addr])} qrCode={qrCode} />
+      <DeltaDialogQrInner
+        description={tx('qrshow_join_contact_hint', [
+          deltachat.credentials.addr,
+        ])}
+        qrCode={qrCode}
+      />
     </DeltaDialog>
   )
 }

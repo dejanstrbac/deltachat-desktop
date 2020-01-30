@@ -11,10 +11,12 @@ import { useChatStore } from '../../stores/chat'
 const log = logger.getLogger('renderer/composer')
 
 const insideBoundingRect = (mouseX, mouseY, boundingRect, margin = 0) => {
-  return mouseX >= boundingRect.x - margin &&
-         mouseX <= boundingRect.x + boundingRect.width + margin &&
-         mouseY >= boundingRect.y - margin &&
-         mouseY <= boundingRect.y + boundingRect.height + margin
+  return (
+    mouseX >= boundingRect.x - margin &&
+    mouseX <= boundingRect.x + boundingRect.width + margin &&
+    mouseY >= boundingRect.y - margin &&
+    mouseY <= boundingRect.y + boundingRect.height + margin
+  )
 }
 
 const Composer = React.forwardRef((props, ref) => {
@@ -32,7 +34,10 @@ const Composer = React.forwardRef((props, ref) => {
       log.debug(`Empty message: don't send it...`)
       return
     }
-    chatStoreDispatch({ type: 'SEND_MESSAGE', payload: [chatId, message, null] })
+    chatStoreDispatch({
+      type: 'SEND_MESSAGE',
+      payload: [chatId, message, null],
+    })
 
     messageInputRef.current.clearText()
     messageInputRef.current.focus()
@@ -41,7 +46,10 @@ const Composer = React.forwardRef((props, ref) => {
   const addFilename = () => {
     remote.dialog.showOpenDialog({ properties: ['openFile'] }, filenames => {
       if (filenames && filenames[0]) {
-        chatStoreDispatch({ type: 'SEND_MESSAGE', payload: [chatId, '', filenames[0]] })
+        chatStoreDispatch({
+          type: 'SEND_MESSAGE',
+          payload: [chatId, '', filenames[0]],
+        })
       }
     })
   }
@@ -58,24 +66,34 @@ const Composer = React.forwardRef((props, ref) => {
     const onClick = ({ clientX, clientY }) => {
       if (!emojiAndStickerRef.current) return
       const boundingRect = emojiAndStickerRef.current.getBoundingClientRect()
-      const clickIsOutSideEmojiPicker = !insideBoundingRect(clientX, clientY, boundingRect, 2)
+      const clickIsOutSideEmojiPicker = !insideBoundingRect(
+        clientX,
+        clientY,
+        boundingRect,
+        2
+      )
       if (clickIsOutSideEmojiPicker) setShowEmojiPicker(false)
     }
 
     document.addEventListener('click', onClick)
-    return () => { document.removeEventListener('click', onClick) }
+    return () => {
+      document.removeEventListener('click', onClick)
+    }
   }, [showEmojiPicker, emojiAndStickerRef])
 
   const tx = window.translate
 
   if (isDisabled) {
     if (disabledReason) {
-      return <div
-        ref={ref}
-        className={'composer composer--disabled-message-input'}
-        style={{ textAlign: 'center', padding: '0.5rem', color: '#999' }}>
-        {tx(disabledReason)}
-      </div>
+      return (
+        <div
+          ref={ref}
+          className={'composer composer--disabled-message-input'}
+          style={{ textAlign: 'center', padding: '0.5rem', color: '#999' }}
+        >
+          {tx(disabledReason)}
+        </div>
+      )
     } else {
       return <span />
     }
@@ -83,10 +101,12 @@ const Composer = React.forwardRef((props, ref) => {
     return (
       <div className='composer' ref={ref}>
         <div className='composer__attachment-button'>
-          <Button minimal
+          <Button
+            minimal
             icon='paperclip'
             onClick={addFilename.bind(this)}
-            aria-label={tx('attachment')} />
+            aria-label={tx('attachment')}
+          />
         </div>
         <SettingsContext.Consumer>
           {({ enterKeySends }) => (
@@ -100,12 +120,22 @@ const Composer = React.forwardRef((props, ref) => {
             />
           )}
         </SettingsContext.Consumer>
-        <div className='composer__emoji-button' ref={pickerButtonRef} onClick={onEmojiIconClick} aria-label={tx('emoji')}>
+        <div
+          className='composer__emoji-button'
+          ref={pickerButtonRef}
+          onClick={onEmojiIconClick}
+          aria-label={tx('emoji')}
+        >
           <span />
         </div>
-        { showEmojiPicker &&
-          <EmojiAndStickerPicker chatId={chatId} ref={emojiAndStickerRef} onEmojiSelect={onEmojiSelect} setShowEmojiPicker={setShowEmojiPicker} />
-        }
+        {showEmojiPicker && (
+          <EmojiAndStickerPicker
+            chatId={chatId}
+            ref={emojiAndStickerRef}
+            onEmojiSelect={onEmojiSelect}
+            setShowEmojiPicker={setShowEmojiPicker}
+          />
+        )}
         <div className='composer__send-button-wrapper' onClick={sendMessage}>
           <button aria-label={tx('menu_send')} />
         </div>

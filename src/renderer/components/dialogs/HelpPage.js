@@ -8,52 +8,67 @@ import ClickableLink from '../helpers/ClickableLink'
 import { join } from 'path'
 import fs from 'fs'
 
-const contentFilePath = join(__dirname, `../../../../static/help/__locale__/help.html`)
+const contentFilePath = join(
+  __dirname,
+  `../../../../static/help/__locale__/help.html`
+)
 
-function helpPageReadContentFile () {
+function helpPageReadContentFile() {
   const locale = window.localeData.locale
   let contentFile = contentFilePath.replace('__locale__', locale)
   if (!fs.existsSync(contentFile)) {
     if (locale !== 'en') {
       contentFile = contentFilePath.replace('__locale__', 'en')
     } else {
-      throw new Error(`Cannot read HTML content, file not found: '${contentFile}'`)
+      throw new Error(
+        `Cannot read HTML content, file not found: '${contentFile}'`
+      )
     }
   }
   return fs.readFileSync(contentFile, 'utf-8')
 }
 
-export function HelpPageContent ({ props }) {
+export function HelpPageContent({ props }) {
   // Make links open externaly (without this, nothing happens if one clicks on a link).
-  const parserOptions = { replace: (node) => {
-    if (node.attribs && node.attribs.href && node.attribs.href.startsWith('http')) {
-      return (
-        <ClickableLink href={node.attribs.href}>{domToReact(node.children, parserOptions)}</ClickableLink>
-      )
-    } else if (node.attribs && node.attribs.src) {
-      node.attribs.src = node.attribs.src.replace('../', './help/')
-      return node
-    }
-  } }
+  const parserOptions = {
+    replace: node => {
+      if (
+        node.attribs &&
+        node.attribs.href &&
+        node.attribs.href.startsWith('http')
+      ) {
+        return (
+          <ClickableLink href={node.attribs.href}>
+            {domToReact(node.children, parserOptions)}
+          </ClickableLink>
+        )
+      } else if (node.attribs && node.attribs.src) {
+        node.attribs.src = node.attribs.src.replace('../', './help/')
+        return node
+      }
+    },
+  }
   return parse(helpPageReadContentFile(), parserOptions)
 }
 
-function HelpPageLocalCopyHint ({ props }) {
+function HelpPageLocalCopyHint({ props }) {
   const locale = window.localeData.locale
   const localizedHref = `https://delta.chat/${locale}/help`
   const text = window.translate('help_page_local_copy_hint')
-  const linkedText = reactStringReplace(text, /\[LINK:([^\]]+)\]/, (match, index) => (
-    <ClickableLink href={localizedHref} key={index}>{match}</ClickableLink>
-  ))
-
-  return (
-    <p className='help-page-local-copy-hint'>
-      {linkedText}
-    </p>
+  const linkedText = reactStringReplace(
+    text,
+    /\[LINK:([^\]]+)\]/,
+    (match, index) => (
+      <ClickableLink href={localizedHref} key={index}>
+        {match}
+      </ClickableLink>
+    )
   )
+
+  return <p className='help-page-local-copy-hint'>{linkedText}</p>
 }
 
-export default function HelpPage (props) {
+export default function HelpPage(props) {
   return (
     <DeltaDialog
       title={window.translate('menu_help')}

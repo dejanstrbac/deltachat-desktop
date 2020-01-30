@@ -3,30 +3,51 @@ const { app, remote } = require('electron')
 const colors = require('colors/safe')
 const startTime = Date.now()
 
-const emojiFontCss = 'font-family: Roboto, "Apple Color Emoji", NotoEmoji, "Helvetica Neue", Arial, Helvetica, NotoMono, sans-serif !important;'
+const emojiFontCss =
+  'font-family: Roboto, "Apple Color Emoji", NotoEmoji, "Helvetica Neue", Arial, Helvetica, NotoMono, sans-serif !important;'
 
 const rc = remote ? remote.app.rc : app ? app.rc : {}
 
 const LoggerVariants = [
   { log: console.debug, level: 'DEBUG', emoji: '🕸️', symbol: '[D]' },
   { log: console.info, level: 'INFO', emoji: 'ℹ️', symbol: colors.blue('[i]') },
-  { log: console.warn, level: 'WARNING', emoji: '⚠️', symbol: colors.yellow('[w]') },
-  { log: console.error, level: 'ERROR', emoji: '🚨', symbol: colors.red('[E]') },
-  { log: console.error, level: 'CRITICAL', emoji: '🚨🚨', symbol: colors.red('[C]') }
+  {
+    log: console.warn,
+    level: 'WARNING',
+    emoji: '⚠️',
+    symbol: colors.yellow('[w]'),
+  },
+  {
+    log: console.error,
+    level: 'ERROR',
+    emoji: '🚨',
+    symbol: colors.red('[E]'),
+  },
+  {
+    log: console.error,
+    level: 'CRITICAL',
+    emoji: '🚨🚨',
+    symbol: colors.red('[C]'),
+  },
 ]
 
-function printProcessLogLevelInfo () {
+function printProcessLogLevelInfo() {
   /* ignore-console-log */
-  console.info(`%cLogging Levels:\n${LoggerVariants.map((v) => `${v.emoji} ${v.level}`).join('\n')}`, emojiFontCss)
+  console.info(
+    `%cLogging Levels:\n${LoggerVariants.map(v => `${v.emoji} ${v.level}`).join(
+      '\n'
+    )}`,
+    emojiFontCss
+  )
 }
 
 let handler
 
-function setLogHandler (LogHandler) {
+function setLogHandler(LogHandler) {
   handler = LogHandler
 }
 
-function log ({ channel, isMainProcess }, level, stacktrace, args) {
+function log({ channel, isMainProcess }, level, stacktrace, args) {
   const variant = LoggerVariants[level]
   if (!handler) {
     /* ignore-console-log */
@@ -38,7 +59,9 @@ function log ({ channel, isMainProcess }, level, stacktrace, args) {
   handler(channel, variant.level, stacktrace, ...args)
   if (rc['log-to-console']) {
     if (isMainProcess) {
-      const begining = `${Math.round((Date.now() - startTime) / 100) / 10}s ${LoggerVariants[level].symbol}${colors.grey(channel)}:`
+      const begining = `${Math.round((Date.now() - startTime) / 100) / 10}s ${
+        LoggerVariants[level].symbol
+      }${colors.grey(channel)}:`
       if (!stacktrace) {
         /* ignore-console-log */
         console.log(begining, ...args)
@@ -59,43 +82,45 @@ function log ({ channel, isMainProcess }, level, stacktrace, args) {
   }
 }
 
-function getStackTrace () {
+function getStackTrace() {
   const rawStack = esp.parse(new Error('Get Stacktrace'))
   const stack = rawStack.slice(2, rawStack.length)
-  return rc['machine-readable-stacktrace'] ? stack : stack.map(s => `\n${s.toString()}`).join()
+  return rc['machine-readable-stacktrace']
+    ? stack
+    : stack.map(s => `\n${s.toString()}`).join()
 }
 
 const LOG_DEBUG = rc['log-debug']
 
 class Logger {
-  constructor (channel) {
+  constructor(channel) {
     this.channel = channel
     this.isMainProcess = typeof window === 'undefined'
   }
 
-  debug (...args) {
+  debug(...args) {
     if (!LOG_DEBUG) return
     log(this, 0, undefined, args)
   }
 
-  info (...args) {
+  info(...args) {
     log(this, 1, undefined, args)
   }
 
-  warn (...args) {
+  warn(...args) {
     log(this, 2, getStackTrace(), args)
   }
 
-  error (...args) {
+  error(...args) {
     log(this, 3, getStackTrace(), args)
   }
 
-  critical (...args) {
+  critical(...args) {
     log(this, 4, getStackTrace(), args)
   }
 }
 
-function getLogger (channel) {
+function getLogger(channel) {
   return new Logger(channel)
 }
 

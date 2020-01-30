@@ -16,15 +16,22 @@ const messageIdsToShow = (oldestFetchedMessageIndex, messageIds) => {
   return messageIdsToShow
 }
 
-export default function MessageList ({ chat, refComposer, locationStreamingEnabled }) {
-  const [{
-    oldestFetchedMessageIndex,
-    messages,
-    messageIds,
-    scrollToBottom,
-    scrollToLastPage,
-    scrollHeight
-  }, chatStoreDispatch] = useChatStore()
+export default function MessageList({
+  chat,
+  refComposer,
+  locationStreamingEnabled,
+}) {
+  const [
+    {
+      oldestFetchedMessageIndex,
+      messages,
+      messageIds,
+      scrollToBottom,
+      scrollToLastPage,
+      scrollHeight,
+    },
+    chatStoreDispatch,
+  ] = useChatStore()
   const messageListRef = useRef(null)
   const lastKnownScrollPosition = useRef([null, null])
   const isFetching = useRef(false)
@@ -35,14 +42,21 @@ export default function MessageList ({ chat, refComposer, locationStreamingEnabl
     setTimeout(() => {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight
     }, 30)
-    chatStoreDispatch({ type: 'FINISHED_SCROLL', payload: 'SCROLLED_TO_BOTTOM' })
+    chatStoreDispatch({
+      type: 'FINISHED_SCROLL',
+      payload: 'SCROLLED_TO_BOTTOM',
+    })
   }, [scrollToBottom])
 
   useEffect(() => {
     if (scrollToLastPage === false) return
     // restore old scroll position after new messages are rendered
-    messageListRef.current.scrollTop = messageListRef.current.scrollHeight - lastKnownScrollPosition.current
-    chatStoreDispatch({ type: 'FINISHED_SCROLL', payload: 'SCROLLED_TO_LAST_PAGE' })
+    messageListRef.current.scrollTop =
+      messageListRef.current.scrollHeight - lastKnownScrollPosition.current
+    chatStoreDispatch({
+      type: 'FINISHED_SCROLL',
+      payload: 'SCROLLED_TO_LAST_PAGE',
+    })
     isFetching.current = false
   }, [scrollToLastPage, scrollHeight])
 
@@ -50,12 +64,22 @@ export default function MessageList ({ chat, refComposer, locationStreamingEnabl
     isFetching.current = false
   }, [chat.id])
 
-  const [fetchMore] = useDebouncedCallback(() => {
-    chatStoreDispatch({ type: 'FETCH_MORE_MESSAGES', payload: { scrollHeight: messageListRef.current.scrollHeight } })
-  }, 30, { leading: true })
+  const [fetchMore] = useDebouncedCallback(
+    () => {
+      chatStoreDispatch({
+        type: 'FETCH_MORE_MESSAGES',
+        payload: { scrollHeight: messageListRef.current.scrollHeight },
+      })
+    },
+    30,
+    { leading: true }
+  )
 
   const onScroll = Event => {
-    if (messageListRef.current.scrollTop === 0 && isFetching.current === false) {
+    if (
+      messageListRef.current.scrollTop === 0 &&
+      isFetching.current === false
+    ) {
       lastKnownScrollPosition.current = messageListRef.current.scrollHeight
       isFetching.current = true
       log.debug('Scrolled to top, fetching more messsages!')
@@ -63,12 +87,15 @@ export default function MessageList ({ chat, refComposer, locationStreamingEnabl
     }
   }
 
-  const _messageIdsToShow = messageIdsToShow(oldestFetchedMessageIndex, messageIds)
+  const _messageIdsToShow = messageIdsToShow(
+    oldestFetchedMessageIndex,
+    messageIds
+  )
 
   let specialMessageIdCounter = 0
   return (
     <div id='message-list' ref={messageListRef} onScroll={onScroll}>
-      <ul >
+      <ul>
         {_messageIdsToShow.map((messageId, i) => {
           if (messageId === C.DC_MSG_ID_DAYMARKER) {
             const key = 'magic' + messageId + '_' + specialMessageIdCounter++
@@ -92,7 +119,7 @@ export default function MessageList ({ chat, refComposer, locationStreamingEnabl
   )
 }
 
-export function DayMarker (props) {
+export function DayMarker(props) {
   const { timestamp } = props
   const tx = window.translate
   return (
@@ -102,7 +129,7 @@ export function DayMarker (props) {
           sameDay: `[${tx('today')}]`,
           lastDay: `[${tx('yesterday')}]`,
           lastWeek: 'LL',
-          sameElse: 'LL'
+          sameElse: 'LL',
         })}
       </p>
     </InfoMessage>
